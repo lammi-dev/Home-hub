@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5EFE6">
+<title>Home Hub – Victoria</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F5EFE6;--card:#FDFAF5;--card2:#F8F2EA;--border:#E2D5C3;
+  --p:#B5651D;--pl:#F0DDD0;--pm:#D4956A;--p2:#8B4513;
+  --s:#6B8F71;--sl:#D4E8D6;
+  --t:#2C1810;--m:#8B7355;--sand:#E8DDD0;--light:#FAF7F2;
+  --danger:#C0392B;--dl:#FADBD8;
+  --shadow:0 1px 3px rgba(44,24,16,0.08);
+  --shadow-lg:0 4px 16px rgba(44,24,16,0.12);
+}
+html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Nunito',sans-serif;font-size:15px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+input,select,textarea,button{font-family:'Nunito',sans-serif}
+button{cursor:pointer}
+
+/* Layout */
+#app{display:flex;height:100vh;overflow:hidden}
+#sidebar{width:200px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform 0.25s}
+#content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+#topbar{display:none}
+#main{flex:1;padding:24px;max-width:900px;width:100%}
+
+/* Sidebar nav */
+.sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--border)}
+.logo-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--p);font-weight:600;line-height:1.2}
+.logo-sub{font-size:11px;color:var(--m);margin-top:2px}
+.nav-section{padding:8px 8px 4px;font-size:10px;font-weight:600;color:var(--border);text-transform:uppercase;letter-spacing:0.08em;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin:1px 6px;transition:all 0.15s;color:var(--m);font-size:13px;font-weight:500}
+.nav-item:hover{background:var(--pl);color:var(--p)}
+.nav-item.active{background:var(--pl);color:var(--p);font-weight:600}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto}
+.sidebar-footer-text{font-size:10px;color:var(--border)}
+
+/* Cards & UI */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.card-sm{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px}
+.section-head{margin-bottom:20px}
+.section-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--t)}
+.section-sub{font-size:13px;color:var(--m);margin-top:3px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;border:none;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);opacity:0.9}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--p);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--m)}
+.btn-ghost:hover{border-color:var(--pm);color:var(--p)}
+.btn-ai{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff}
+.btn-danger{background:var(--dl);color:var(--danger);border:1px solid var(--danger)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px}
+
+/* Form elements */
+.inp{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;background:var(--card);color:var(--t);font-size:13px;outline:none;transition:border-color 0.15s}
+.inp:focus{border-color:var(--p)}
+.inp::placeholder{color:var(--border)}
+.inp-sm{padding:6px 10px;font-size:12px;border-radius:7px}
+.form-row{display:grid;gap:8px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.label{font-size:12px;font-weight:500;color:var(--m);margin-bottom:3px}
+.form-group{display:flex;flex-direction:column;gap:3px}
+
+/* Tags & badges */
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;border-radius:10px;font-size:11px;font-weight:600;padding:0 5px}
+
+/* Checkboxes */
+.checkbox{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;background:var(--card)}
+.checkbox.checked{background:var(--s);border-color:var(--s);color:#fff}
+.checkbox.checked::after{content:'✓';font-size:12px;font-weight:700}
+
+/* Progress */
+.progress{height:6px;background:var(--sand);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width 0.4s}
+
+/* AI box */
+.ai-response{background:var(--pl);border:1px solid var(--pm);border-radius:12px;padding:14px 16px;margin-top:12px;display:none}
+.ai-label{font-size:10px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ai-text{font-size:13px;color:var(--t);line-height:1.7;white-space:pre-wrap}
+
+/* Loading pulse */
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp 0.22s ease forwards}
+
+/* Row items */
+.list-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border)}
+.list-item:last-child{border-bottom:none}
+.list-item:hover{background:var(--light)}
+.item-del{background:none;border:none;color:var(--border);font-size:20px;padding:2px 6px;cursor:pointer;line-height:1;border-radius:5px;transition:color 0.15s}
+.item-del:hover{color:var(--danger)}
+
+/* Table */
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:0.05em;background:var(--card2)}
+td{font-size:13px}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--light)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* Inline-flex row */
+.flex{display:flex;align-items:center}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.flex-wrap{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.gap4{gap:4px}.gap6{gap:6px}.gap8{gap:8px}.gap12{gap:12px}
+
+/* Colors for tags */
+.tag-amber{background:#FAEEDA;color:#633806}
+.tag-teal{background:var(--sl);color:#085041}
+.tag-purple{background:#EEEDFE;color:#3C3489}
+.tag-coral{background:#FAECE7;color:#712B13}
+.tag-blue{background:#E6F1FB;color:#0C447C}
+.tag-red{background:var(--dl);color:var(--danger)}
+.tag-gray{background:var(--sand);color:var(--m)}
+.tag-green{background:var(--sl);color:var(--s)}
+
+/* Stat cards */
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 12px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:600}
+.stat-label{font-size:11px;color:var(--m);margin-top:3px}
+
+/* Form panel (collapsible) */
+.form-panel{background:var(--pl);border:1px solid var(--pm);border-radius:12px;padding:14px;margin-bottom:12px;display:none}
+
+/* Meal grid */
+.meal-table{overflow-x:auto}
+.meal-table table th{background:var(--card2);font-size:11px;padding:6px 8px}
+.meal-cell{min-height:28px;padding:4px 6px;font-size:12px;border-radius:6px;cursor:pointer;text-align:center;transition:background 0.1s;display:flex;align-items:center;justify-content:center;color:var(--m)}
+.meal-cell.filled{background:var(--pl);color:var(--p);font-weight:500}
+.meal-cell:hover{background:var(--sand)}
+
+/* Mobile */
+#mobile-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.mob-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;cursor:pointer;border:none;background:none;color:var(--m);font-family:'Nunito',sans-serif;font-size:9px;font-weight:500;transition:color 0.15s;min-width:0}
+.mob-item.active{color:var(--p)}
+.mob-icon{font-size:18px;line-height:1}
+
+@media(max-width:640px){
+  #sidebar{display:none}
+  #mobile-bar{display:flex}
+  #content{padding-bottom:60px}
+  #main{padding:16px 14px}
+  #topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+  .section-title{font-size:20px}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .hide-mobile{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-title">Home Hub</div>
+      <div class="logo-sub">Victoria's home</div>
+    </div>
+    <div id="sidebar-nav"></div>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-text">Data saves automatically</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div id="content">
+    <div id="topbar">
+      <div class="logo-title" style="font-size:16px">Home Hub</div>
+      <div id="topbar-title" style="font-size:13px;color:var(--m)"></div>
+    </div>
+    <div style="display:flex;justify-content:center">
+      <div id="main"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE NAV -->
+<div id="mobile-bar"></div>
+
+<script>
+// ===================== DATA =====================
+const SECTIONS = [
+  {id:'overview', label:'Overview', icon:'🏠'},
+  {id:'meals',    label:'Meals',    icon:'🍽️'},
+  {id:'pantry',   label:'Pantry',   icon:'🥫'},
+  {id:'chores',   label:'Chores',   icon:'✅'},
+  {id:'family',   label:'Family',   icon:'👶'},
+  {id:'shopping', label:'Shopping', icon:'🛒'},
+  {id:'budget',   label:'Budget',   icon:'💰'},
+  {id:'maintenance',label:'Maintenance',icon:'🔧'},
+]
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+const MEALS = ['Breakfast','Lunch','Dinner']
+
+const DEFAULT = {
+  meals:{plan:{},recipes:[
+    {id:1,name:'Jollof Rice',ingredients:'rice, tomatoes, peppers, onion, chicken stock',tags:'Nigerian,Family'},
+    {id:2,name:'Overnight Oats',ingredients:'oats, oat milk, berries, honey, chia seeds',tags:'Quick,Breakfast'},
+    {id:3,name:'Egusi Soup',ingredients:'egusi seeds, spinach, stockfish, palm oil, crayfish, beef',tags:'Nigerian,Family'},
+    {id:4,name:'Moin Moin',ingredients:'black-eyed beans, peppers, onion, fish, eggs',tags:'Nigerian,Batch'},
+  ]},
+  pantry:{items:[
+    {id:1,name:'Rice',qty:'2kg',loc:'Pantry',exp:''},
+    {id:2,name:'Chicken breast',qty:'500g',loc:'Freezer',exp:'2025-06-01'},
+    {id:3,name:'Tomatoes (canned)',qty:'4 cans',loc:'Pantry',exp:''},
+    {id:4,name:'Egusi seeds',qty:'300g',loc:'Pantry',exp:''},
+    {id:5,name:'Palm oil',qty:'1 litre',loc:'Pantry',exp:''},
+    {id:6,name:'Oat milk',qty:'2 litres',loc:'Fridge',exp:'2025-05-10'},
+  ]},
+  chores:{tasks:[
+    {id:1,name:'Hoover living room',freq:'Weekly',done:false,who:'Victoria'},
+    {id:2,name:'Wipe kitchen surfaces',freq:'Daily',done:false,who:'Victoria'},
+    {id:3,name:'Clean bathrooms',freq:'Weekly',done:false,who:'Victoria'},
+    {id:4,name:'Do laundry',freq:'Weekly',done:true,who:'Victoria'},
+    {id:5,name:'Empty bins',freq:'Weekly',done:false,who:'Victoria'},
+    {id:6,name:'Mop floors',freq:'Weekly',done:false,who:'Victoria'},
+  ]},
+  family:{logs:[
+    {id:1,date:'2025-04-22',type:'Sleep',note:'7:30pm – 6:30am, one wake at 2am',member:'Baby'},
+    {id:2,date:'2025-04-22',type:'Feed',note:'Breakfast: porridge + banana purée',member:'Baby'},
+    {id:3,date:'2025-04-22',type:'Play',note:'Tummy time 20 mins, nursery rhymes',member:'Baby'},
+  ],appointments:[
+    {id:1,date:'2025-05-02',title:'30th Birthday Ladies Event 🎉',note:'12 guests · pink dress code · outdoor'},
+    {id:2,date:'2025-06-01',title:'HR Impact Summit – Speaking',note:'AI in People Ops presentation'},
+  ]},
+  shopping:{items:[
+    {id:1,name:'Oat milk',qty:'2 cartons',done:false,cat:'Dairy'},
+    {id:2,name:'Spinach',qty:'1 bag',done:false,cat:'Veg'},
+    {id:3,name:'Chicken thighs',qty:'1kg',done:true,cat:'Protein'},
+    {id:4,name:'Berries',qty:'punnet',done:false,cat:'Fruit'},
+    {id:5,name:'Egusi seeds',qty:'500g',done:false,cat:'Dry goods'},
+    {id:6,name:'Nappies',qty:'1 box',done:false,cat:'Baby'},
+  ]},
+  budget:{monthly:3500,entries:[
+    {id:1,type:'expense',cat:'Groceries',amount:120,date:'2025-04-01',note:'Weekly shop'},
+    {id:2,type:'expense',cat:'Bills',amount:85,date:'2025-04-05',note:'Electric'},
+    {id:3,type:'expense',cat:'Transport',amount:60,date:'2025-04-10',note:'Oyster top-up'},
+    {id:4,type:'expense',cat:'Baby',amount:45,date:'2025-04-12',note:'Nappies & wipes'},
+    {id:5,type:'income',cat:'Salary',amount:3500,date:'2025-04-28',note:'Monthly salary'},
+  ]},
+  maintenance:{tasks:[
+    {id:1,name:'Bleed radiators',priority:'High',due:'2025-05-01',done:false,notes:'Before end of heating season'},
+    {id:2,name:'Check boiler service',priority:'High',due:'2025-06-01',done:false,notes:'Annual service due'},
+    {id:3,name:'Clean oven',priority:'Medium',due:'2025-05-15',done:false,notes:''},
+    {id:4,name:'Clean gutters',priority:'Low',due:'2025-07-01',done:false,notes:''},
+    {id:5,name:'Replace bathroom sealant',priority:'Low',due:'2025-08-01',done:false,notes:'Around bath'},
+  ]}
+}
+
+let data = JSON.parse(JSON.stringify(DEFAULT))
+let active = 'overview'
+let _pantryFilter = 'All'
+let _shopCat = 'All'
+
+try {
+  const saved = localStorage.getItem('homehub-v3')
+  if (saved) { const p = JSON.parse(saved); if (p && p.meals) data = p }
+} catch(e){}
+
+function save() {
+  try { localStorage.setItem('homehub-v3', JSON.stringify(data)) } catch(e){}
+}
+function uid() { return Date.now() + Math.floor(Math.random()*1000) }
+
+// ===================== AI =====================
+async function callAI(prompt, system='') {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are a warm, practical home management assistant for a busy working mum in London. She loves Nigerian cooking and has a baby. Keep answers concise, friendly and practical. ${system}`,
+        messages:[{role:'user',content:prompt}]
+      })
+    })
+    const d = await res.json()
+    return d.content?.[0]?.text || 'No response. Please try again.'
+  } catch(e) {
+    return 'AI is unavailable right now. Make sure you have an internet connection and try again.'
+  }
+}
+
+function showAILoading(id) {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.style.display='block'
+  el.innerHTML=`<div class="ai-label">✦ AI Assistant <span class="pulse">thinking...</span></div>`
+  el.scrollIntoView({behavior:'smooth',block:'nearest'})
+}
+
+function showAIResult(id, text) {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.innerHTML=`<div class="ai-label">✦ AI Assistant</div><div class="ai-text">${escHtml(text)}</div>`
+}
+
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+
+// ===================== NAV =====================
+function buildNav() {
+  const nav = document.getElementById('sidebar-nav')
+  nav.innerHTML = SECTIONS.map(s => `
+    <div class="nav-item${active===s.id?' active':''}" onclick="go('${s.id}')">
+      <span class="nav-icon">${s.icon}</span>
+      <span>${s.label}</span>
+    </div>`).join('')
+
+  const mob = document.getElementById('mobile-bar')
+  mob.innerHTML = SECTIONS.map(s => `
+    <button class="mob-item${active===s.id?' active':''}" onclick="go('${s.id}')">
+      <span class="mob-icon">${s.icon}</span>${s.label}
+    </button>`).join('')
+
+  const topTitle = document.getElementById('topbar-title')
+  if(topTitle) topTitle.textContent = SECTIONS.find(s=>s.id===active)?.label || ''
+}
+
+function go(id) {
+  active = id
+  buildNav()
+  render()
+  document.getElementById('content').scrollTop = 0
+}
+
+// ===================== RENDER ROUTER =====================
+function render() {
+  const main = document.getElementById('main')
+  const fns = {overview,meals,pantry,chores,family,shopping,budget,maintenance}
+  main.innerHTML = (fns[active] || overview)()
+}
+
+// ===================== OVERVIEW =====================
+function overview() {
+  const pendChores = data.chores.tasks.filter(t=>!t.done).length
+  const shopTodo   = data.shopping.items.filter(i=>!i.done).length
+  const maintTodo  = data.maintenance.tasks.filter(t=>!t.done).length
+  const inc = data.budget.entries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0)
+  const exp = data.budget.entries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0)
+  const pct = inc>0 ? Math.min(100,Math.round((exp/inc)*100)) : 0
+
+  const today = new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})
+  const todayMon = 'Mon'
+  const meals3 = MEALS.map(m => ({m, v:data.meals.plan[`${todayMon}-${m}`]||''}))
+  const upAppts = [...data.family.appointments].sort((a,b)=>a.date.localeCompare(b.date)).slice(0,4)
+  const pendTasks = data.chores.tasks.filter(t=>!t.done).slice(0,4)
+
+  return `<div class="fade-up">
+  <div class="section-head">
+    <div class="section-title">Good day 🌿</div>
+    <div class="section-sub">${today} · Here's your home at a glance</div>
+  </div>
+
+  <div class="grid4" style="margin-bottom:18px">
+    <div class="stat-card" onclick="go('chores')" style="cursor:pointer">
+      <div class="stat-num" style="color:var(--p)">${pendChores}</div>
+      <div class="stat-label">Chores to do</div>
+    </div>
+    <div class="stat-card" onclick="go('pantry')" style="cursor:pointer">
+      <div class="stat-num" style="color:var(--s)">${data.pantry.items.length}</div>
+      <div class="stat-label">Pantry items</div>
+    </div>
+    <div class="stat-card" onclick="go('shopping')" style="cursor:pointer">
+      <div class="stat-num" style="color:#7B68EE">${shopTodo}</div>
+      <div class="stat-label">To buy</div>
+    </div>
+    <div class="stat-card" onclick="go('maintenance')" style="cursor:pointer">
+      <div class="stat-num" style="color:var(--pm)">${maintTodo}</div>
+      <div class="stat-label">Maintenance</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:15px">Today's meals</div>
+        <button class="btn btn-ghost btn-xs" onclick="go('meals')">Edit →</button>
+      </div>
+      ${meals3.map(({m,v})=>`
+        <div class="flex-between list-item" style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:12px;color:var(--m)">${m}</span>
+          <span style="font-size:13px;color:${v?'var(--t)':'var(--border)'}">${v||'Not planned'}</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:15px">Upcoming events</div>
+        <button class="btn btn-ghost btn-xs" onclick="go('family')">All →</button>
+      </div>
+      ${upAppts.map(a=>`
+        <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;font-weight:500">${a.title}</div>
+          <div style="font-size:11px;color:var(--m)">${a.date}${a.note?' · '+a.note:''}</div>
+        </div>`).join('') || '<p style="font-size:13px;color:var(--m)">No upcoming events</p>'}
+    </div>
+
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:15px">Budget this month</div>
+        <button class="btn btn-ghost btn-xs" onclick="go('budget')">Details →</button>
+      </div>
+      <div class="flex-between" style="font-size:13px;margin-bottom:4px">
+        <span style="color:var(--m)">Income</span>
+        <span style="color:var(--s);font-weight:600">£${inc.toLocaleString()}</span>
+      </div>
+      <div class="flex-between" style="font-size:13px;margin-bottom:10px">
+        <span style="color:var(--m)">Expenses</span>
+        <span style="color:var(--danger);font-weight:600">£${exp.toLocaleString()}</span>
+      </div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%;background:var(--p)"></div></div>
+      <div style="font-size:11px;color:var(--m);margin-top:5px">${pct}% of income spent · £${(inc-exp).toLocaleString()} remaining</div>
+    </div>
+
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:15px">Chores to do</div>
+        <button class="btn btn-ghost btn-xs" onclick="go('chores')">All →</button>
+      </div>
+      ${pendTasks.map(t=>`
+        <div class="flex" style="gap:8px;padding:7px 0;border-bottom:1px solid var(--border)">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--p);flex-shrink:0;margin-top:5px"></div>
+          <span style="font-size:13px;flex:1">${t.name}</span>
+          <span class="tag tag-amber" style="font-size:10px">${t.freq}</span>
+        </div>`).join('') || '<p style="font-size:13px;color:var(--s)">All done! 🎉</p>'}
+    </div>
+  </div>
+</div>`
+}
+
+// ===================== MEALS =====================
+function meals() {
+  const recipes = data.meals.recipe || data.meals.recipes || []
+  return `<div class="fade-up">
+  <div class="section-head flex-between flex-wrap">
+    <div>
+      <div class="section-title">Meal Planner</div>
+      <div class="section-sub">Click any cell to add a meal · plan your whole week</div>
+    </div>
+    <button class="btn btn-ai" onclick="aiMeals()">✦ AI suggest meals</button>
+  </div>
+
+  <div class="card meal-table" style="margin-bottom:16px">
+    <table>
+      <thead><tr>
+        <th style="width:80px"></th>
+        ${DAYS.map(d=>`<th style="text-align:center">${d}</th>`).join('')}
+      </tr></thead>
+      <tbody>
+        ${MEALS.map(meal=>`
+          <tr>
+            <td style="font-size:12px;color:var(--m);font-weight:500">${meal}</td>
+            ${DAYS.map(day => {
+              const k = `${day}-${meal}`
+              const v = data.meals.plan[k]||''
+              return `<td><div class="meal-cell${v?' filled':''}" onclick="editCell('${k}')" id="mc-${k}">${escHtml(v)||'+'}</div></td>`
+            }).join('')}
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ai-response" id="ai-meals"></div>
+
+  <div class="flex-between flex-wrap" style="margin:20px 0 12px;gap:8px">
+    <div style="font-weight:600;font-size:16px">Saved Recipes (${recipes.length})</div>
+    <button class="btn btn-ghost btn-sm" onclick="togglePanel('rp-form')">+ Add recipe</button>
+  </div>
+
+  <div class="form-panel" id="rp-form">
+    <div class="form-row">
+      <div class="form-group"><div class="label">Recipe name</div><input class="inp" id="r-name" placeholder="e.g. Jollof Rice"></div>
+      <div class="form-group"><div class="label">Ingredients</div><input class="inp" id="r-ing" placeholder="Comma-separated"></div>
+      <div class="form-group"><div class="label">Tags</div><input class="inp" id="r-tags" placeholder="e.g. Nigerian, Quick"></div>
+    </div>
+    <div class="flex gap8" style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="saveRecipe()">Save recipe</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('rp-form')">Cancel</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+    ${recipes.map(r=>`
+      <div class="card-sm" style="position:relative">
+        <button class="item-del" onclick="deleteRecipe(${r.id})" style="position:absolute;top:8px;right:8px">×</button>
+        <div style="font-weight:600;font-size:14px;margin-bottom:4px;padding-right:24px">${escHtml(r.name)}</div>
+        <div style="font-size:12px;color:var(--m);margin-bottom:8px">${escHtml(r.ingredients)}</div>
+        <div class="flex flex-wrap gap4">
+          ${(r.tags||'').split(',').map(t=>`<span class="tag tag-amber">${t.trim()}</span>`).join('')}
+        </div>
+      </div>`).join('')}
+  </div>
+</div>`
+}
+
+function editCell(k) {
+  const el = document.getElementById('mc-'+k)
+  if (!el) return
+  const cur = data.meals.plan[k]||''
+  el.innerHTML = `<input class="inp inp-sm" value="${escHtml(cur)}" style="text-align:center;min-width:60px"
+    onblur="saveCell('${k}',this.value)" onkeydown="if(event.key==='Enter')this.blur()" autofocus>`
+  const inp = el.querySelector('input')
+  if(inp){inp.focus();inp.select()}
+}
+
+function saveCell(k, v) {
+  v = v.trim()
+  data.meals.plan[k] = v
+  save()
+  const el = document.getElementById('mc-'+k)
+  if(el){
+    el.className = 'meal-cell'+(v?' filled':'')
+    el.textContent = v||'+'
+    el.onclick = ()=>editCell(k)
+  }
+}
+
+function togglePanel(id) {
+  const el = document.getElementById(id)
+  if(el) el.style.display = el.style.display==='block'?'none':'block'
+}
+
+function saveRecipe() {
+  const name = document.getElementById('r-name')?.value.trim()
+  if(!name) return alert('Please enter a recipe name')
+  if(!data.meals.recipes) data.meals.recipes=[]
+  data.meals.recipes.push({id:uid(),name,ingredients:document.getElementById('r-ing')?.value||'',tags:document.getElementById('r-tags')?.value||'General'})
+  save(); go('meals')
+}
+
+function deleteRecipe(id) {
+  if(!confirm('Delete this recipe?')) return
+  data.meals.recipes = data.meals.recipes.filter(r=>r.id!==id)
+  save(); render()
+}
+
+async function aiMeals() {
+  showAILoading('ai-meals')
+  const pantry = data.pantry.items.map(i=>i.name).join(', ')
+  const recipes = (data.meals.recipes||[]).map(r=>r.name).join(', ')
+  const text = await callAI(`Suggest a full week of meal plans. I have these pantry items: ${pantry||'rice, chicken, tomatoes'}. My saved recipes include: ${recipes}. Include Nigerian dishes. Family-friendly for a mum with a baby. Format neatly: Day → Breakfast / Lunch / Dinner.`)
+  showAIResult('ai-meals', text)
+}
+
+// ===================== PANTRY =====================
+function pantry() {
+  const locs = ['All','Pantry','Fridge','Freezer']
+  const items = _pantryFilter==='All' ? data.pantry.items : data.pantry.items.filter(i=>i.loc===_pantryFilter)
+  const locStyle = {Pantry:{bg:' var(--pl)',c:'var(--p)'},Freezer:{bg:'#E8F4FD',c:'#2980B9'},Fridge:{bg:'var(--sl)',c:'var(--s)'}}
+
+  return `<div class="fade-up">
+  <div class="section-head flex-between flex-wrap">
+    <div>
+      <div class="section-title">Pantry & Freezer</div>
+      <div class="section-sub">${data.pantry.items.length} items tracked</div>
+    </div>
+    <div class="flex gap8">
+      <button class="btn btn-ai btn-sm" onclick="aiPantry()">✦ What can I cook?</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('pantry-form')">+ Add item</button>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap gap4" style="margin-bottom:14px">
+    ${locs.map(l=>`<button class="btn btn-sm" onclick="_pantryFilter='${l}';render()"
+      style="background:${_pantryFilter===l?'var(--p)':'var(--sand)'};color:${_pantryFilter===l?'#fff':'var(--m)'};border:none">${l}</button>`).join('')}
+  </div>
+
+  <div class="form-panel" id="pantry-form">
+    <div class="form-grid">
+      <div class="form-group"><div class="label">Item name</div><input class="inp inp-sm" id="pi-name" placeholder="e.g. Chicken breast"></div>
+      <div class="form-group"><div class="label">Quantity</div><input class="inp inp-sm" id="pi-qty" placeholder="e.g. 500g"></div>
+      <div class="form-group"><div class="label">Location</div>
+        <select class="inp inp-sm" id="pi-loc"><option>Pantry</option><option>Fridge</option><option>Freezer</option></select>
+      </div>
+      <div class="form-group"><div class="label">Expiry (optional)</div><input class="inp inp-sm" id="pi-exp" type="date"></div>
+    </div>
+    <div class="flex gap8" style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="addPantryItem()">Add item</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('pantry-form')">Cancel</button>
+    </div>
+  </div>
+
+  <div class="ai-response" id="ai-pantry"></div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    ${items.length ? items.map(item => {
+      const s = locStyle[item.loc]||{bg:'var(--sand)',c:'var(--m)'}
+      return `<div class="list-item">
+        <span class="tag" style="background:${s.bg};color:${s.c};flex-shrink:0">${item.loc}</span>
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:14px">${escHtml(item.name)}</div>
+          <div style="font-size:12px;color:var(--m)">${escHtml(item.qty)}${item.exp?' · Exp: '+item.exp:''}</div>
+        </div>
+        <button class="item-del" onclick="deletePantryItem(${item.id})">×</button>
+      </div>`}).join('') : `<div style="padding:28px;text-align:center;color:var(--m);font-size:14px">No items here. Add some!</div>`}
+  </div>
+</div>`
+}
+
+function addPantryItem() {
+  const name = document.getElementById('pi-name')?.value.trim()
+  if(!name) return alert('Please enter an item name')
+  data.pantry.items.push({id:uid(),name,qty:document.getElementById('pi-qty')?.value||'1',loc:document.getElementById('pi-loc')?.value||'Pantry',exp:document.getElementById('pi-exp')?.value||''})
+  save(); go('pantry')
+}
+
+function deletePantryItem(id) {
+  data.pantry.items = data.pantry.items.filter(i=>i.id!==id); save(); render()
+}
+
+async function aiPantry() {
+  showAILoading('ai-pantry')
+  const items = data.pantry.items.map(i=>`${i.name} (${i.qty}, ${i.loc})`).join(', ')
+  const text = await callAI(`I have these items: ${items||'rice, chicken, tomatoes'}. Suggest 3 meals I can make today or this week. Include a Nigerian recipe if possible. Keep it quick and practical for a busy working mum.`)
+  showAIResult('ai-pantry', text)
+}
+
+// ===================== CHORES =====================
+function chores() {
+  const pending = data.chores.tasks.filter(t=>!t.done)
+  const done = data.chores.tasks.filter(t=>t.done)
+  const freqC = {Daily:{bg:'#FFF8E1',c:'#F57F17'},Weekly:{bg:'var(--pl)',c:'var(--p)'},Monthly:{bg:'var(--sl)',c:'var(--s)'}}
+
+  return `<div class="fade-up">
+  <div class="section-head flex-between flex-wrap">
+    <div>
+      <div class="section-title">Chores & Cleaning</div>
+      <div class="section-sub">${pending.length} to do · ${done.length} done</div>
+    </div>
+    <div class="flex gap8">
+      <button class="btn btn-ai btn-sm" onclick="aiChores()">✦ AI rota</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('chore-form')">+ Add task</button>
+    </div>
+  </div>
+
+  <div class="form-panel" id="chore-form">
+    <div class="form-grid">
+      <div class="form-group"><div class="label">Task name</div><input class="inp inp-sm" id="ch-name" placeholder="e.g. Mop kitchen floor"></div>
+      <div class="form-group"><div class="label">Frequency</div>
+        <select class="inp inp-sm" id="ch-freq"><option>Daily</option><option selected>Weekly</option><option>Monthly</option></select>
+      </div>
+    </div>
+    <div class="flex gap8" style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="addChore()">Add task</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('chore-form')">Cancel</button>
+    </div>
+  </div>
+
+  <div class="ai-response" id="ai-chores"></div>
+
+  ${pending.length ? `
+  <div style="font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px">To do (${pending.length})</div>
+  <div class="card" style="padding:0;overflow:hidden">
+    ${pending.map(t=>{
+      const s = freqC[t.freq]||{bg:'var(--sand)',c:'var(--m)'}
+      return `<div class="list-item">
+        <div class="checkbox" onclick="toggleChore(${t.id})"></div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:500">${escHtml(t.name)}</div>
+          <div style="font-size:12px;color:var(--m)">${t.who}</div>
+        </div>
+        <span class="tag" style="background:${s.bg};color:${s.c}">${t.freq}</span>
+        <button class="item-del" onclick="deleteChore(${t.id})">×</button>
+      </div>`}).join('')}
+  </div>` : ''}
+
+  ${done.length ? `
+  <div style="font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:0.06em;margin:14px 0 8px">Done (${done.length})</div>
+  <div class="card" style="padding:0;overflow:hidden;opacity:0.55">
+    ${done.map(t=>`
+      <div class="list-item">
+        <div class="checkbox checked" onclick="toggleChore(${t.id})"></div>
+        <span style="font-size:14px;flex:1;text-decoration:line-through;color:var(--m)">${escHtml(t.name)}</span>
+        <button class="item-del" onclick="deleteChore(${t.id})">×</button>
+      </div>`).join('')}
+  </div>` : ''}
+
+  ${!pending.length && !done.length ? '<div style="text-align:center;padding:32px;color:var(--m)">No tasks yet. Add one above!</div>' : ''}
+</div>`
+}
+
+function toggleChore(id) { const t=data.chores.tasks.find(t=>t.id===id); if(t){t.done=!t.done;save();render()} }
+function deleteChore(id) { data.chores.tasks=data.chores.tasks.filter(t=>t.id!==id);save();render() }
+function addChore() {
+  const name=document.getElementById('ch-name')?.value.trim()
+  if(!name) return alert('Please enter a task name')
+  data.chores.tasks.push({id:uid(),name,freq:document.getElementById('ch-freq')?.value||'Weekly',done:false,who:'Victoria'})
+  save(); go('chores')
+}
+async function aiChores() {
+  showAILoading('ai-chores')
+  const text = await callAI('Create a realistic weekly cleaning and home management rota for a busy working mum in a London flat with a baby. Include daily, weekly and monthly tasks. Group them by day and be practical about time commitments.')
+  showAIResult('ai-chores', text)
+}
+
+// ===================== FAMILY =====================
+function family() {
+  const typeC = {Feed:{bg:'var(--pl)',c:'var(--p)'},Sleep:{bg:'#EEEDFE',c:'#3C3489'},Play:{bg:'var(--sl)',c:'var(--s)'},Health:{bg:'var(--dl)',c:'var(--danger)'},Other:{bg:'var(--sand)',c:'var(--m)'}}
+
+  return `<div class="fade-up">
+  <div class="section-head">
+    <div class="section-title">Family Tracker</div>
+    <div class="section-sub">Baby logs, appointments and family events</div>
+  </div>
+
+  <div class="grid2">
+    <div>
+      <div class="flex-between" style="margin-bottom:10px">
+        <div style="font-weight:600;font-size:15px">Baby daily log</div>
+        <button class="btn btn-ghost btn-sm" onclick="togglePanel('log-form')">+ Add log</button>
+      </div>
+      <div class="form-panel" id="log-form">
+        <div class="form-grid">
+          <div class="form-group"><div class="label">Type</div>
+            <select class="inp inp-sm" id="fl-type"><option>Feed</option><option>Sleep</option><option>Play</option><option>Health</option><option>Other</option></select>
+          </div>
+          <div class="form-group"><div class="label">Date</div>
+            <input class="inp inp-sm" id="fl-date" type="date" value="${new Date().toISOString().slice(0,10)}">
+          </div>
+          <div class="form-group" style="grid-column:1/-1"><div class="label">Note</div>
+            <input class="inp inp-sm" id="fl-note" placeholder="e.g. 7pm–7am, banana + porridge">
+          </div>
+        </div>
+        <div class="flex gap8" style="margin-top:10px">
+          <button class="btn btn-primary btn-sm" onclick="addLog()">Add</button>
+          <button class="btn btn-ghost btn-sm" onclick="togglePanel('log-form')">Cancel</button>
+        </div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;max-height:420px;overflow-y:auto">
+        ${data.family.logs.map(l=>{
+          const s=typeC[l.type]||typeC.Other
+          return `<div class="list-item">
+            <span class="tag" style="background:${s.bg};color:${s.c};flex-shrink:0">${l.type}</span>
+            <div style="flex:1"><div style="font-size:13px">${escHtml(l.note)}</div><div style="font-size:11px;color:var(--m)">${l.date} · ${l.member}</div></div>
+            <button class="item-del" onclick="deleteLog(${l.id})">×</button>
+          </div>`}).join('') || '<div style="padding:20px;text-align:center;color:var(--m);font-size:13px">No logs yet</div>'}
+      </div>
+    </div>
+
+    <div>
+      <div class="flex-between" style="margin-bottom:10px">
+        <div style="font-weight:600;font-size:15px">Events & appointments</div>
+        <button class="btn btn-ghost btn-sm" onclick="togglePanel('appt-form')">+ Add</button>
+      </div>
+      <div class="form-panel" id="appt-form">
+        <div class="form-row">
+          <div class="form-group"><div class="label">Title</div><input class="inp inp-sm" id="ap-title" placeholder="e.g. GP appointment"></div>
+          <div class="form-group"><div class="label">Date</div><input class="inp inp-sm" id="ap-date" type="date"></div>
+          <div class="form-group"><div class="label">Notes</div><input class="inp inp-sm" id="ap-note" placeholder="Optional notes"></div>
+        </div>
+        <div class="flex gap8" style="margin-top:10px">
+          <button class="btn btn-primary btn-sm" onclick="addAppt()">Add</button>
+          <button class="btn btn-ghost btn-sm" onclick="togglePanel('appt-form')">Cancel</button>
+        </div>
+      </div>
+      <div style="display:grid;gap:8px">
+        ${[...data.family.appointments].sort((a,b)=>a.date.localeCompare(b.date)).map(a=>`
+          <div class="card-sm flex-between" style="align-items:flex-start">
+            <div>
+              <div style="font-weight:500;font-size:14px">${escHtml(a.title)}</div>
+              <div style="font-size:12px;color:var(--m);margin-top:2px">${a.date}</div>
+              ${a.note?`<div style="font-size:12px;color:var(--t);margin-top:3px">${escHtml(a.note)}</div>`:''}
+            </div>
+            <button class="item-del" onclick="deleteAppt(${a.id})">×</button>
+          </div>`).join('') || '<div style="padding:20px;text-align:center;color:var(--m);font-size:13px">No appointments yet</div>'}
+      </div>
+    </div>
+  </div>
+</div>`
+}
+
+function addLog() {
+  const note=document.getElementById('fl-note')?.value.trim()
+  if(!note) return alert('Please add a note')
+  data.family.logs.unshift({id:uid(),date:document.getElementById('fl-date')?.value,type:document.getElementById('fl-type')?.value,note,member:'Baby'})
+  save(); go('family')
+}
+function addAppt() {
+  const title=document.getElementById('ap-title')?.value.trim(); const date=document.getElementById('ap-date')?.value
+  if(!title||!date) return alert('Please fill in a title and date')
+  data.family.appointments.push({id:uid(),title,date,note:document.getElementById('ap-note')?.value||''})
+  save(); go('family')
+}
+function deleteLog(id) { data.family.logs=data.family.logs.filter(l=>l.id!==id);save();render() }
+function deleteAppt(id) { data.family.appointments=data.family.appointments.filter(a=>a.id!==id);save();render() }
+
+// ===================== SHOPPING =====================
+function shopping() {
+  const cats=['All','Fruit & Veg','Protein','Dairy','Dry goods','Baby','Other']
+  const pend = data.shopping.items.filter(i=>!i.done && (_shopCat==='All'||i.cat===_shopCat))
+  const done = data.shopping.items.filter(i=>i.done)
+
+  return `<div class="fade-up">
+  <div class="section-head flex-between flex-wrap">
+    <div>
+      <div class="section-title">Shopping List</div>
+      <div class="section-sub">${data.shopping.items.filter(i=>!i.done).length} items to get</div>
+    </div>
+    <div class="flex gap8 flex-wrap">
+      <button class="btn btn-ai btn-sm" onclick="aiShopping()">✦ AI generate list</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('shop-form')">+ Add item</button>
+      ${done.length?`<button class="btn btn-ghost btn-sm" onclick="clearShopDone()">Clear done</button>`:''}
+    </div>
+  </div>
+
+  <div class="form-panel" id="shop-form">
+    <div class="form-grid">
+      <div class="form-group"><div class="label">Item</div><input class="inp inp-sm" id="sh-name" placeholder="e.g. Spinach"></div>
+      <div class="form-group"><div class="label">Quantity</div><input class="inp inp-sm" id="sh-qty" placeholder="e.g. 1 bag"></div>
+      <div class="form-group"><div class="label">Category</div>
+        <select class="inp inp-sm" id="sh-cat">
+          ${['Fruit & Veg','Protein','Dairy','Dry goods','Baby','Other'].map(c=>`<option>${c}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="flex gap8" style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="addShopItem()">Add</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('shop-form')">Cancel</button>
+    </div>
+  </div>
+
+  <div class="ai-response" id="ai-shop"></div>
+
+  <div class="flex flex-wrap gap4" style="margin-bottom:12px">
+    ${cats.map(c=>`<button class="btn btn-sm" onclick="_shopCat='${c}';render()"
+      style="background:${_shopCat===c?'var(--p)':'var(--sand)'};color:${_shopCat===c?'#fff':'var(--m)'};border:none">${c}</button>`).join('')}
+  </div>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    ${pend.map(item=>`
+      <div class="list-item">
+        <div class="checkbox" onclick="toggleShop(${item.id})"></div>
+        <div style="flex:1">
+          <span style="font-size:14px;font-weight:500">${escHtml(item.name)}</span>
+          <span style="font-size:12px;color:var(--m);margin-left:8px">${escHtml(item.qty)}</span>
+        </div>
+        <span class="tag tag-gray">${escHtml(item.cat)}</span>
+        <button class="item-del" onclick="deleteShopItem(${item.id})">×</button>
+      </div>`).join('')}
+    ${done.map(item=>`
+      <div class="list-item" style="opacity:0.45">
+        <div class="checkbox checked" onclick="toggleShop(${item.id})"></div>
+        <span style="font-size:14px;flex:1;text-decoration:line-through;color:var(--m)">${escHtml(item.name)}</span>
+        <button class="item-del" onclick="deleteShopItem(${item.id})">×</button>
+      </div>`).join('')}
+    ${!pend.length && !done.length ? '<div style="padding:28px;text-align:center;color:var(--m);font-size:14px">List is empty — add items or use AI!</div>':''}
+  </div>
+</div>`
+}
+
+function addShopItem() {
+  const name=document.getElementById('sh-name')?.value.trim()
+  if(!name) return alert('Please enter an item name')
+  data.shopping.items.push({id:uid(),name,qty:document.getElementById('sh-qty')?.value||'1',cat:document.getElementById('sh-cat')?.value||'Other',done:false})
+  save(); go('shopping')
+}
+function toggleShop(id) { const i=data.shopping.items.find(i=>i.id===id);if(i){i.done=!i.done;save();render()} }
+function deleteShopItem(id) { data.shopping.items=data.shopping.items.filter(i=>i.id!==id);save();render() }
+function clearShopDone() { data.shopping.items=data.shopping.items.filter(i=>!i.done);save();render() }
+async function aiShopping() {
+  showAILoading('ai-shop')
+  const meals=Object.entries(data.meals.plan||{}).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join(', ')
+  const have=data.pantry.items.map(i=>i.name).join(', ')
+  const text = await callAI(`Generate a UK supermarket shopping list. My week's meals: ${meals||'not planned yet'}. I already have: ${have||'nothing listed'}. Include Nigerian cooking staples I might need. Group by category. Be concise.`)
+  showAIResult('ai-shop', text)
+}
+
+// ===================== BUDGET =====================
+function budget() {
+  const inc = data.budget.entries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0)
+  const exp = data.budget.entries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0)
+  const bal = inc - exp
+  const pct = inc>0 ? Math.min(100,Math.round((exp/inc)*100)) : 0
+  const byC = data.budget.entries.filter(e=>e.type==='expense').reduce((a,e)=>{a[e.cat]=(a[e.cat]||0)+e.amount;return a},{})
+  const catCol = ['#B5651D','#6B8F71','#7B68EE','#D4956A','#C0392B','#2980B9']
+
+  return `<div class="fade-up">
+  <div class="section-head flex-between flex-wrap">
+    <div>
+      <div class="section-title">Budget & Bills</div>
+      <div class="section-sub">Track your income and spending</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="togglePanel('budget-form')">+ Add entry</button>
+  </div>
+
+  <div class="grid3" style="margin-bottom:16px">
+    <div class="stat-card"><div class="stat-num" style="color:var(--s)">£${inc.toLocaleString()}</div><div class="stat-label">Income</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--danger)">£${exp.toLocaleString()}</div><div class="stat-label">Expenses</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:${bal>=0?'var(--s)':'var(--danger)'}">£${bal.toLocaleString()}</div><div class="stat-label">Remaining</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="flex-between" style="margin-bottom:8px">
+      <span style="font-size:13px;color:var(--m)">Spending this month</span>
+      <span style="font-size:13px;font-weight:600;color:${pct>80?'var(--danger)':'var(--p)'}">${pct}% of income</span>
+    </div>
+    <div class="progress"><div class="progress-fill" style="width:${pct}%;background:${pct>80?'var(--danger)':'var(--p)'}"></div></div>
+  </div>
+
+  <div class="form-panel" id="budget-form">
+    <div class="form-grid">
+      <div class="form-group"><div class="label">Type</div>
+        <select class="inp inp-sm" id="be-type"><option value="expense">Expense</option><option value="income">Income</option></select>
+      </div>
+      <div class="form-group"><div class="label">Category</div><input class="inp inp-sm" id="be-cat" placeholder="e.g. Groceries"></div>
+      <div class="form-group"><div class="label">Amount (£)</div><input class="inp inp-sm" id="be-amt" type="number" placeholder="0.00"></div>
+      <div class="form-group"><div class="label">Date</div><input class="inp inp-sm" id="be-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+      <div class="form-group"><div class="label">Note (optional)</div><input class="inp inp-sm" id="be-note" placeholder=""></div>
+    </div>
+    <div class="flex gap8" style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="addBudget()">Add entry</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('budget-form')">Cancel</button>
+    </div>
+  </div>
+
+  ${Object.keys(byC).length ? `
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-weight:600;font-size:14px;margin-bottom:12px">Spending breakdown</div>
+    ${Object.entries(byC).map(([cat,amt],i)=>`
+      <div style="margin-bottom:8px">
+        <div class="flex-between" style="font-size:13px;margin-bottom:3px">
+          <span>${escHtml(cat)}</span><span style="font-weight:500">£${amt.toLocaleString()}</span>
+        </div>
+        <div class="progress"><div class="progress-fill" style="width:${exp>0?Math.round((amt/exp)*100):0}%;background:${catCol[i%catCol.length]}"></div></div>
+      </div>`).join('')}
+  </div>` : ''}
+
+  <div class="card" style="padding:0;overflow:hidden">
+    ${[...data.budget.entries].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`
+      <div class="list-item">
+        <div style="width:8px;height:8px;border-radius:50%;background:${e.type==='income'?'var(--s)':'var(--danger)'};flex-shrink:0"></div>
+        <div style="flex:1">
+          <div class="flex-between">
+            <span style="font-size:14px;font-weight:500">${escHtml(e.cat)}${e.note?' · '+escHtml(e.note):''}</span>
+            <span style="font-size:14px;font-weight:600;color:${e.type==='income'?'var(--s)':'var(--danger)'}">${e.type==='income'?'+':'-'}£${e.amount.toLocaleString()}</span>
+          </div>
+          <div style="font-size:11px;color:var(--m)">${e.date}</div>
+        </div>
+        <button class="item-del" onclick="deleteBudget(${e.id})">×</button>
+      </div>`).join('') || '<div style="padding:24px;text-align:center;color:var(--m)">No entries yet</div>'}
+  </div>
+</div>`
+}
+
+function addBudget() {
+  const amt=parseFloat(document.getElementById('be-amt')?.value)
+  if(!amt) return alert('Please enter an amount')
+  data.budget.entries.push({id:uid(),type:document.getElementById('be-type')?.value,cat:document.getElementById('be-cat')?.value||'Other',amount:amt,date:document.getElementById('be-date')?.value,note:document.getElementById('be-note')?.value||''})
+  save(); go('budget')
+}
+function deleteBudget(id) { data.budget.entries=data.budget.entries.filter(e=>e.id!==id);save();render() }
+
+// ===================== MAINTENANCE =====================
+function maintenance() {
+  const priC={High:{bg:'var(--dl)',c:'var(--danger)'},Medium:{bg:'#FFF8E1',c:'#F57F17'},Low:{bg:'var(--sl)',c:'var(--s)'}}
+  const pend=[...data.maintenance.tasks.filter(t=>!t.done)].sort((a,b)=>{const o={High:0,Medium:1,Low:2};return o[a.priority]-o[b.priority]})
+  const done=data.maintenance.tasks.filter(t=>t.done)
+
+  return `<div class="fade-up">
+  <div class="section-head flex-between flex-wrap">
+    <div>
+      <div class="section-title">Home Maintenance</div>
+      <div class="section-sub">${pend.length} tasks outstanding</div>
+    </div>
+    <div class="flex gap8">
+      <button class="btn btn-ai btn-sm" onclick="aiMaintenance()">✦ AI suggestions</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('maint-form')">+ Add task</button>
+    </div>
+  </div>
+
+  <div class="form-panel" id="maint-form">
+    <div class="form-grid">
+      <div class="form-group"><div class="label">Task</div><input class="inp inp-sm" id="mt-name" placeholder="e.g. Fix leaking tap"></div>
+      <div class="form-group"><div class="label">Priority</div>
+        <select class="inp inp-sm" id="mt-pri"><option>High</option><option selected>Medium</option><option>Low</option></select>
+      </div>
+      <div class="form-group"><div class="label">Due date</div><input class="inp inp-sm" id="mt-due" type="date"></div>
+      <div class="form-group"><div class="label">Notes</div><input class="inp inp-sm" id="mt-notes" placeholder="Optional"></div>
+    </div>
+    <div class="flex gap8" style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="addMaint()">Add task</button>
+      <button class="btn btn-ghost btn-sm" onclick="togglePanel('maint-form')">Cancel</button>
+    </div>
+  </div>
+
+  <div class="ai-response" id="ai-maint"></div>
+
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:${done.length?'14px':'0'}">
+    ${pend.map(t=>{
+      const s=priC[t.priority]||priC.Medium
+      return `<div class="list-item" style="align-items:flex-start">
+        <div class="checkbox" onclick="toggleMaint(${t.id})" style="margin-top:2px"></div>
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:14px">${escHtml(t.name)}</div>
+          ${t.due?`<div style="font-size:12px;color:var(--m)">Due: ${t.due}</div>`:''}
+          ${t.notes?`<div style="font-size:12px;color:var(--m)">${escHtml(t.notes)}</div>`:''}
+        </div>
+        <span class="tag" style="background:${s.bg};color:${s.c};flex-shrink:0">${t.priority}</span>
+        <button class="item-del" onclick="deleteMaint(${t.id})">×</button>
+      </div>`}).join('') || '<div style="padding:24px;text-align:center;color:var(--m);font-size:14px">No outstanding tasks!</div>'}
+  </div>
+
+  ${done.length ? `
+  <div style="font-size:11px;font-weight:600;color:var(--m);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Completed</div>
+  <div class="card" style="padding:0;overflow:hidden;opacity:0.5">
+    ${done.map(t=>`
+      <div class="list-item">
+        <div class="checkbox checked" onclick="toggleMaint(${t.id})"></div>
+        <span style="font-size:14px;flex:1;text-decoration:line-through;color:var(--m)">${escHtml(t.name)}</span>
+        <button class="item-del" onclick="deleteMaint(${t.id})">×</button>
+      </div>`).join('')}
+  </div>` : ''}
+</div>`
+}
+
+function addMaint() {
+  const name=document.getElementById('mt-name')?.value.trim()
+  if(!name) return alert('Please enter a task name')
+  data.maintenance.tasks.push({id:uid(),name,priority:document.getElementById('mt-pri')?.value,due:document.getElementById('mt-due')?.value||'',notes:document.getElementById('mt-notes')?.value||'',done:false})
+  save(); go('maintenance')
+}
+function toggleMaint(id) { const t=data.maintenance.tasks.find(t=>t.id===id);if(t){t.done=!t.done;save();render()} }
+function deleteMaint(id) { data.maintenance.tasks=data.maintenance.tasks.filter(t=>t.id!==id);save();render() }
+async function aiMaintenance() {
+  showAILoading('ai-maint')
+  const have=data.maintenance.tasks.map(t=>t.name).join(', ')
+  const text=await callAI(`Seasonal home maintenance checklist for a London flat in spring 2025. I already have planned: ${have||'nothing yet'}. What else should I prioritise? List by priority (High/Medium/Low) with brief reasons.`)
+  showAIResult('ai-maint', text)
+}
+
+// ===================== INIT =====================
+buildNav()
+render()
+</script>
+</body>
+</html>
