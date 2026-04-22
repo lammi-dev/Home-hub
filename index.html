@@ -27,6 +27,13 @@ html,body{height:100%;background:var(--bg);color:var(--t);font-family:'Nunito',s
 input,select,textarea,button{font-family:'Nunito',sans-serif}
 button{cursor:pointer}
 
+/* Login */
+#login-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 32px;width:100%;max-width:360px;box-shadow:var(--shadow-lg);text-align:center}
+.login-logo{font-family:'Playfair Display',serif;font-size:26px;color:var(--p);font-weight:600;margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--m);margin-bottom:28px}
+.login-error{background:var(--dl);color:var(--danger);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:12px;display:none}
+
 /* Layout */
 #app{display:flex;height:100vh;overflow:hidden}
 #sidebar{width:200px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;transition:transform 0.25s}
@@ -173,6 +180,23 @@ tr:hover td{background:var(--light)}
 </style>
 </head>
 <body>
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🏠 Home Hub</div>
+    <div class="login-sub">Victoria's home · Please sign in</div>
+    <div class="login-error" id="login-error"></div>
+    <div class="form-group" style="text-align:left;margin-bottom:12px">
+      <div class="label">Username</div>
+      <input class="inp" id="login-user" type="text" placeholder="Enter username" autocomplete="username">
+    </div>
+    <div class="form-group" style="text-align:left;margin-bottom:20px">
+      <div class="label">Password</div>
+      <input class="inp" id="login-pass" type="password" placeholder="Enter password" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:10px" onclick="doLogin()" id="login-btn">Sign in</button>
+  </div>
+</div>
+
 <div id="app">
   <!-- SIDEBAR -->
   <div id="sidebar">
@@ -183,6 +207,7 @@ tr:hover td{background:var(--light)}
     <div id="sidebar-nav"></div>
     <div class="sidebar-footer">
       <div class="sidebar-footer-text">Data saves automatically</div>
+      <button class="btn btn-ghost btn-sm" onclick="logout()" style="margin-top:8px;width:100%;justify-content:center">Sign out</button>
     </div>
   </div>
 
@@ -1070,9 +1095,61 @@ function aiMaintenance() {
   showAIInput('aip-maint','ai-maint',`Seasonal home maintenance checklist for a London flat in spring. I already have planned: ${have||'nothing yet'}. What else should I prioritise? List by priority (High/Medium/Low) with brief reasons.`)
 }
 
+// ===================== AUTH =====================
+function checkSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem('homehub-session') || '{}')
+    if (s.loggedIn && s.until > Date.now()) return true
+  } catch(e) {}
+  return false
+}
+
+function logout() {
+  localStorage.removeItem('homehub-session')
+  document.getElementById('login-screen').style.display = 'flex'
+  document.getElementById('app').style.display = 'none'
+  document.getElementById('mobile-bar').style.display = 'none'
+  document.getElementById('login-user').value = ''
+  document.getElementById('login-pass').value = ''
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim()
+  const password = document.getElementById('login-pass').value
+  const errEl = document.getElementById('login-error')
+  const btn = document.getElementById('login-btn')
+  if (!username || !password) { errEl.textContent = 'Please enter your username and password.'; errEl.style.display = 'block'; return }
+  btn.textContent = 'Signing in…'; btn.disabled = true; errEl.style.display = 'none'
+  try {
+    const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password}) })
+    const d = await res.json()
+    if (res.ok && d.success) {
+      localStorage.setItem('homehub-session', JSON.stringify({loggedIn:true, until: Date.now() + 7*24*60*60*1000}))
+      document.getElementById('login-screen').style.display = 'none'
+      document.getElementById('app').style.display = 'flex'
+      buildNav(); render()
+    } else {
+      errEl.textContent = d.error || 'Invalid username or password.'
+      errEl.style.display = 'block'
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Please try again.'
+    errEl.style.display = 'block'
+  }
+  btn.textContent = 'Sign in'; btn.disabled = false
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') doLogin()
+})
+
 // ===================== INIT =====================
-buildNav()
-render()
+if (checkSession()) {
+  document.getElementById('login-screen').style.display = 'none'
+  buildNav(); render()
+} else {
+  document.getElementById('app').style.display = 'none'
+}
 </script>
 </body>
 </html>
