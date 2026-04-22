@@ -288,18 +288,14 @@ function uid() { return Date.now() + Math.floor(Math.random()*1000) }
 // ===================== AI =====================
 async function callAI(prompt, system='') {
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/chat', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        system:`You are a warm, practical home management assistant for a busy working mum in London. She loves Nigerian cooking and has a baby. Keep answers concise, friendly and practical. ${system}`,
-        messages:[{role:'user',content:prompt}]
-      })
+      body: JSON.stringify({prompt, system})
     })
     const d = await res.json()
-    return d.content?.[0]?.text || 'No response. Please try again.'
+    if (!res.ok) return `Error: ${d.error || 'Something went wrong. Please try again.'}`
+    return d.text || 'No response. Please try again.'
   } catch(e) {
     return 'AI is unavailable right now. Make sure you have an internet connection and try again.'
   }
