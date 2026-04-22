@@ -92,6 +92,7 @@ button{cursor:pointer}
 .progress-fill{height:100%;border-radius:3px;transition:width 0.4s}
 
 /* AI box */
+.ai-prompt-box{background:var(--card);border:1.5px solid var(--pm);border-radius:12px;padding:14px 16px;margin-top:12px;display:none}
 .ai-response{background:var(--pl);border:1px solid var(--pm);border-radius:12px;padding:14px 16px;margin-top:12px;display:none}
 .ai-label{font-size:10px;font-weight:700;color:var(--p);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .ai-text{font-size:13px;color:var(--t);line-height:1.7;white-space:pre-wrap}
@@ -301,6 +302,32 @@ async function callAI(prompt, system='') {
   }
 }
 
+function showAIInput(boxId, responseId, defaultPrompt) {
+  const box = document.getElementById(boxId)
+  if (!box) return
+  if (box.style.display === 'block') { box.style.display = 'none'; return }
+  box.innerHTML = `
+    <div style="font-size:12px;font-weight:600;color:var(--p);margin-bottom:8px">✦ Customise your prompt</div>
+    <textarea class="inp" id="${boxId}-txt" rows="3" style="resize:vertical;font-size:13px;line-height:1.5">${escHtml(defaultPrompt)}</textarea>
+    <div class="flex gap8" style="margin-top:8px">
+      <button class="btn btn-ai btn-sm" onclick="runAIPrompt('${boxId}','${responseId}')">Generate</button>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('${boxId}').style.display='none'">Cancel</button>
+    </div>`
+  box.style.display = 'block'
+  setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'nearest'}),50)
+}
+
+async function runAIPrompt(boxId, responseId) {
+  const txt = document.getElementById(boxId+'-txt')
+  if (!txt) return
+  const prompt = txt.value.trim()
+  if (!prompt) return
+  document.getElementById(boxId).style.display = 'none'
+  showAILoading(responseId)
+  const text = await callAI(prompt)
+  showAIResult(responseId, text)
+}
+
 function showAILoading(id) {
   const el = document.getElementById(id)
   if (!el) return
@@ -480,6 +507,7 @@ function meals() {
     </table>
   </div>
 
+  <div id="aip-meals" class="ai-prompt-box"></div>
   <div class="ai-response" id="ai-meals"></div>
 
   <div class="flex-between flex-wrap" style="margin:20px 0 12px;gap:8px">
@@ -554,12 +582,10 @@ function deleteRecipe(id) {
   save(); render()
 }
 
-async function aiMeals() {
-  showAILoading('ai-meals')
+function aiMeals() {
   const pantry = data.pantry.items.map(i=>i.name).join(', ')
   const recipes = (data.meals.recipes||[]).map(r=>r.name).join(', ')
-  const text = await callAI(`Suggest a full week of meal plans. I have these pantry items: ${pantry||'rice, chicken, tomatoes'}. My saved recipes include: ${recipes}. Include Nigerian dishes. Family-friendly for a mum with a baby. Format neatly: Day → Breakfast / Lunch / Dinner.`)
-  showAIResult('ai-meals', text)
+  showAIInput('aip-meals','ai-meals',`Suggest a full week of meal plans. I have these pantry items: ${pantry||'rice, chicken, tomatoes'}. My saved recipes include: ${recipes}. Include Nigerian dishes. Family-friendly for a mum with a baby. Format neatly: Day → Breakfast / Lunch / Dinner.`)
 }
 
 // ===================== PANTRY =====================
@@ -600,6 +626,7 @@ function pantry() {
     </div>
   </div>
 
+  <div id="aip-pantry" class="ai-prompt-box"></div>
   <div class="ai-response" id="ai-pantry"></div>
 
   <div class="card" style="padding:0;overflow:hidden">
@@ -628,11 +655,9 @@ function deletePantryItem(id) {
   data.pantry.items = data.pantry.items.filter(i=>i.id!==id); save(); render()
 }
 
-async function aiPantry() {
-  showAILoading('ai-pantry')
+function aiPantry() {
   const items = data.pantry.items.map(i=>`${i.name} (${i.qty}, ${i.loc})`).join(', ')
-  const text = await callAI(`I have these items: ${items||'rice, chicken, tomatoes'}. Suggest 3 meals I can make today or this week. Include a Nigerian recipe if possible. Keep it quick and practical for a busy working mum.`)
-  showAIResult('ai-pantry', text)
+  showAIInput('aip-pantry','ai-pantry',`I have these items: ${items||'rice, chicken, tomatoes'}. Suggest 3 meals I can make today or this week. Include a Nigerian recipe if possible. Keep it quick and practical for a busy working mum.`)
 }
 
 // ===================== CHORES =====================
@@ -666,6 +691,7 @@ function chores() {
     </div>
   </div>
 
+  <div id="aip-chores" class="ai-prompt-box"></div>
   <div class="ai-response" id="ai-chores"></div>
 
   ${pending.length ? `
@@ -707,10 +733,8 @@ function addChore() {
   data.chores.tasks.push({id:uid(),name,freq:document.getElementById('ch-freq')?.value||'Weekly',done:false,who:'Victoria'})
   save(); go('chores')
 }
-async function aiChores() {
-  showAILoading('ai-chores')
-  const text = await callAI('Create a realistic weekly cleaning and home management rota for a busy working mum in a London flat with a baby. Include daily, weekly and monthly tasks. Group them by day and be practical about time commitments.')
-  showAIResult('ai-chores', text)
+function aiChores() {
+  showAIInput('aip-chores','ai-chores','Create a realistic weekly cleaning and home management rota for a busy working mum in a London flat with a baby. Include daily, weekly and monthly tasks. Group them by day and be practical about time commitments.')
 }
 
 // ===================== FAMILY =====================
@@ -839,6 +863,7 @@ function shopping() {
     </div>
   </div>
 
+  <div id="aip-shop" class="ai-prompt-box"></div>
   <div class="ai-response" id="ai-shop"></div>
 
   <div class="flex flex-wrap gap4" style="margin-bottom:12px">
@@ -877,12 +902,10 @@ function addShopItem() {
 function toggleShop(id) { const i=data.shopping.items.find(i=>i.id===id);if(i){i.done=!i.done;save();render()} }
 function deleteShopItem(id) { data.shopping.items=data.shopping.items.filter(i=>i.id!==id);save();render() }
 function clearShopDone() { data.shopping.items=data.shopping.items.filter(i=>!i.done);save();render() }
-async function aiShopping() {
-  showAILoading('ai-shop')
+function aiShopping() {
   const meals=Object.entries(data.meals.plan||{}).filter(([k,v])=>v).map(([k,v])=>`${k}: ${v}`).join(', ')
   const have=data.pantry.items.map(i=>i.name).join(', ')
-  const text = await callAI(`Generate a UK supermarket shopping list. My week's meals: ${meals||'not planned yet'}. I already have: ${have||'nothing listed'}. Include Nigerian cooking staples I might need. Group by category. Be concise.`)
-  showAIResult('ai-shop', text)
+  showAIInput('aip-shop','ai-shop',`Generate a UK supermarket shopping list. My week's meals: ${meals||'not planned yet'}. I already have: ${have||'nothing listed'}. Include Nigerian cooking staples I might need. Group by category. Be concise.`)
 }
 
 // ===================== BUDGET =====================
@@ -1003,6 +1026,7 @@ function maintenance() {
     </div>
   </div>
 
+  <div id="aip-maint" class="ai-prompt-box"></div>
   <div class="ai-response" id="ai-maint"></div>
 
   <div class="card" style="padding:0;overflow:hidden;margin-bottom:${done.length?'14px':'0'}">
@@ -1041,11 +1065,9 @@ function addMaint() {
 }
 function toggleMaint(id) { const t=data.maintenance.tasks.find(t=>t.id===id);if(t){t.done=!t.done;save();render()} }
 function deleteMaint(id) { data.maintenance.tasks=data.maintenance.tasks.filter(t=>t.id!==id);save();render() }
-async function aiMaintenance() {
-  showAILoading('ai-maint')
+function aiMaintenance() {
   const have=data.maintenance.tasks.map(t=>t.name).join(', ')
-  const text=await callAI(`Seasonal home maintenance checklist for a London flat in spring 2025. I already have planned: ${have||'nothing yet'}. What else should I prioritise? List by priority (High/Medium/Low) with brief reasons.`)
-  showAIResult('ai-maint', text)
+  showAIInput('aip-maint','ai-maint',`Seasonal home maintenance checklist for a London flat in spring. I already have planned: ${have||'nothing yet'}. What else should I prioritise? List by priority (High/Medium/Low) with brief reasons.`)
 }
 
 // ===================== INIT =====================
